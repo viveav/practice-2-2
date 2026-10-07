@@ -22,12 +22,12 @@ import { applyFilters } from "./task3-filters";
 //
 // Подсказки:
 // - Регистр не важен: сравнивайте book.title.toLowerCase() и query.toLowerCase()
-// - Частичное совпадение: метод .includes(...)
-// - Пустой query содержится в любой строке, поэтому все книги пройдут
-//   фильтр автоматически — отдельный if не нужен
+// - Частичное совпадение: метод .includes( ... )
+// - Пустой query содержится в любой строке, поэтому все книги пройдут фильтр автоматически - отдельный if не нужен
 export const filterByTitle = (query: string): BookFilter => {
   return (book: Book) => {
-    return false; // <-- TODO 1: ЗАМЕНИТЕ на проверку названия
+
+    return book.title.toLowerCase().includes(query.toLowerCase());
   };
 };
 
@@ -37,28 +37,29 @@ export const filterByTitle = (query: string): BookFilter => {
 // Принимает массив книг и критерий, возвращает НОВЫЙ отсортированный массив.
 //
 // Три правила (из шпаргалки Практики 2.2):
-//   1. КОПИЯ: .sort() мутирует массив, поэтому сначала [...books]
-//   2. ПО УБЫВАНИЮ: новые годы и высокий рейтинг сверху, значит (b - a)
-//   3. ?? 0: year и rating могут быть undefined, подставляем ноль,
-//      чтобы книги без данных опустились в конец
+// 1. КОПИЯ: .sort() мутирует массив, поэтому сначала [ ... books]
+// 2. ПО УБЫВАНИЮ: новые годы и высокий рейтинг сверху, значит (b - а)
+// 3. ?? 0: year и rating могут быть undefined, подставляем ноль, чтобы книги без данных опустились в конец
 export function sortBooks(books: Book[], sortType: "year" | "rating"): Book[] {
   if (sortType === "year") {
-    return books; // <-- TODO 2: ЗАМЕНИТЕ на копию с сортировкой по году
+    return [...books].sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
   }
-  return books; // <-- TODO 3: ЗАМЕНИТЕ на копию с сортировкой по рейтингу
+  return [...books].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
 }
 
 // ------------------------------------------------------------
 // TODO 4: Сборка (композиция). Новой логики здесь НЕТ!
 // ------------------------------------------------------------
 // Просто соедините то, что уже написано выше и в Задании 3:
-//   1. Примените applyFilters к books с единственным фильтром filterByTitle(query)
-//   2. Результат отсортируйте через sortBooks(..., sortType)
+// 1. Примените applyFilters к books с единственным фильтром filterByTitle(query)
+// 2. Результат отсортируйте через sortBooks( ... , sortType)
 // Именно эту функцию проверяют тесты в tests/task5-utils.test.ts
 export function filterAndSortBooks(
   books: Book[],
   query: string,
   sortType: "year" | "rating"
 ): Book[] {
-  return []; // <-- TODO 4: ЗАМЕНИТЕ на композицию applyFilters + sortBooks
+  const filtered = applyFilters(books, [filterByTitle(query)]);
+  
+  return sortBooks(filtered, sortType);
 }
